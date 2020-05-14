@@ -52,6 +52,8 @@
 #include "historystringitem.h"
 #include "klipperpopup.h"
 
+#include "systemclipboard.h"
+
 #ifdef HAVE_PRISON
 #include <prison/Prison>
 #endif
@@ -102,10 +104,9 @@ Klipper::Klipper(QObject* parent, const KSharedConfigPtr& config, KlipperMode mo
     QDBusConnection::sessionBus().registerObject(QStringLiteral("/klipper"), this, QDBusConnection::ExportScriptableSlots);
 
     updateTimestamp(); // read initial X user time
-    m_clip = qApp->clipboard();
+    m_clip = SystemClipboard::instance();
 
-    connect( m_clip, &QClipboard::changed,
-             this, &Klipper::newClipData );
+    connect( m_clip, &SystemClipboard::changed, this, &Klipper::newClipData );
 
     connect( &m_overflowClearTimer, &QTimer::timeout, this, &Klipper::slotClearOverflow);
 
