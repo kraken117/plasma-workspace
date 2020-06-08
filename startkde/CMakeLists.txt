@@ -41,4 +41,10 @@ install(TARGETS startplasma-waylandsession DESTINATION ${KDE_INSTALL_LIBEXECDIR}
 install(PROGRAMS plasma-sourceenv.sh DESTINATION ${KDE_INSTALL_LIBEXECDIR})
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     install(TARGETS kde-systemd-start-condition DESTINATION ${KDE_INSTALL_BINDIR})
-endif ()
+endif()
+
+ecm_install_configured_files(TEMPLATES plasma-ksplash-ready.service.in @ONLY
+                                                   DESTINATION ${SYSTEMD_USER_UNIT_INSTALL_DIR})
+
+install(FILES  plasma-core@.target DESTINATION ${SYSTEMD_USER_UNIT_INSTALL_DIR})
+install(FILES  plasma-workspace@.target DESTINATION ${SYSTEMD_USER_UNIT_INSTALL_DIR})

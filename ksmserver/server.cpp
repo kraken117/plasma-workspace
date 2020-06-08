@@ -97,6 +97,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "kscreenlocker_interface.h"
 #include "kwinsession_interface.h"
 
+#include "../config-workspace.h"
+
 KSMServer* the_server = nullptr;
 
 KSMServer* KSMServer::self()

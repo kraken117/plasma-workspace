@@ -1,0 +1,5 @@
+[Unit]
+Description=KDE Plasma Workspace
+Requires=plasma-core@%i.target plasma-ksplash-ready.service
+Wants=xdg-desktop.target
+After=plasma-core.target
