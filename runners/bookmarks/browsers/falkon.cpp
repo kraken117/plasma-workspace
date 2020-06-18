@@ -42,8 +42,9 @@ QList<BookmarkMatch> Falkon::match(const QString& term, bool addEverything )
 {
     QList<BookmarkMatch> matches;
     for(const auto &bookmark : qAsConst(m_falkonBookmarkEntries)) {
-        const QString url = bookmark.value(QStringLiteral("url")).toString();
-        BookmarkMatch bookmarkMatch(m_favicon->iconFor(url), term, bookmark.value(QStringLiteral("name")).toString(), url);
+        const auto obj = bookmark.toObject();
+        const QString url = obj.value(QStringLiteral("url")).toString();
+        BookmarkMatch bookmarkMatch(m_favicon->iconFor(url), term, obj.value(QStringLiteral("name")).toString(), url);
         bookmarkMatch.addTo(matches, addEverything);
     }
     return matches;
@@ -51,12 +52,12 @@ QList<BookmarkMatch> Falkon::match(const QString& term, bool addEverything )
 
 void Falkon::prepare()
 {
-    m_falkonBookmarkEntries = readProfileBookmarks(m_startupProfile);
+    m_falkonBookmarkEntries = readChromeFormatBookmarks(m_startupProfile + QStringLiteral("/bookmarks.json"));
 }
 
 void Falkon::teardown()
 {
-    m_falkonBookmarkEntries.clear();
+    m_falkonBookmarkEntries = QJsonArray();
 }
 
 QString Falkon::getStartupProfileDir()
@@ -66,36 +67,3 @@ QString Falkon::getStartupProfileDir()
         group("Profiles").readEntry("startProfile", QStringLiteral("default"));
     return QFileInfo(profilesIni).dir().absoluteFilePath(startupProfile);
 }
-
-QList<QJsonObject> Falkon::readProfileBookmarks(const QString &profilePath)
-{
-    const QString fileName = profilePath + QStringLiteral("/bookmarks.json");
-    if (!QFileInfo::exists(fileName)) {
-        return {};
-    }
-    QFile bookmarksFile(fileName);
-    if (!bookmarksFile.open(QFile::ReadOnly)) {
-        return {};
-    }
-
-    QJsonDocument doc = QJsonDocument::fromJson(bookmarksFile.readAll());
-    if (!doc.isObject()) {
-        return {};
-    }
-
-    const QJsonObject roots = doc.object().value(QLatin1String("roots")).toObject();
-    const QStringList bookmarksDisplayLocations = roots.keys();
-    QList<QJsonObject> bookmarks;
-    for (const auto &key : bookmarksDisplayLocations) {
-        const auto children = roots.value(key).toObject().value(QLatin1String("children")).toArray();
-        for(const auto bookmark : children) {
-            const QJsonObject bookmarkObj = bookmark.toObject();
-            if (bookmarkObj.value(QLatin1String("type")).toString() == QLatin1String("url")) {
-                bookmarks << bookmarkObj;
-            }
-        }
-    }
-
-    return bookmarks;
-}
-

@@ -39,6 +39,7 @@ public:
     inline Profile profile() { return m_profile; }
     void tearDown() { m_profile.favicon()->teardown(); clear(); }
     void add(const QJsonObject &bookmarkEntry) { m_bookmarks << bookmarkEntry; }
+    void add(const QJsonArray &entries) { for (const auto &e: entries) m_bookmarks << e; }
     void clear() { m_bookmarks = QJsonArray(); }
 private:
     Profile m_profile;
@@ -83,6 +84,7 @@ QList<BookmarkMatch> Chrome::match(const QString &term, bool addEveryThing, Prof
     QList<BookmarkMatch> results;
 
     const auto bookmarks = profileBookmarks->bookmarks();
+    qWarning() << "chrommmmmm"<<bookmarks.count();
     Favicon *favicon = profileBookmarks->profile().favicon();
     for (const QJsonValue &bookmarkValue : bookmarks) {
         const QJsonObject bookmark = bookmarkValue.toObject();
@@ -99,22 +101,7 @@ void Chrome::prepare()
     for(ProfileBookmarks *profileBookmarks : qAsConst(m_profileBookmarks)) {
         Profile profile = profileBookmarks->profile();
         profileBookmarks->clear();
-        QFile bookmarksFile(profile.path());
-        if (!bookmarksFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            continue;
-        }
-        QJsonDocument jdoc = QJsonDocument::fromJson(bookmarksFile.readAll());
-        if (jdoc.isNull()) {
-            continue;
-        }
-        const QJsonObject resultMap = jdoc.object();
-        if (!resultMap.contains(QLatin1String("roots"))) {
-            return;
-        }
-        const QJsonObject entries = resultMap.value(QStringLiteral("roots")).toObject();
-        for (const QJsonValue &folder : entries) {
-            parseFolder(folder.toObject(), profileBookmarks);
-        }
+        profileBookmarks->add(readChromeFormatBookmarks(profile.path()));
         updateCacheFile(profile.faviconSource(), profile.faviconCache());
         profile.favicon()->prepare();
     }
@@ -124,18 +111,5 @@ void Chrome::teardown()
 {
     for(ProfileBookmarks *profileBookmarks : qAsConst(m_profileBookmarks)) {
         profileBookmarks->tearDown();
-    }
-}
-
-void Chrome::parseFolder(const QJsonObject &entry, ProfileBookmarks *profile)
-{
-    const QJsonArray children = entry.value(QStringLiteral("children")).toArray();
-    for (const QJsonValue &child : children) {
-        const QJsonObject entry = child.toObject();
-        if(entry.value(QStringLiteral("type")).toString() == QLatin1String("folder"))
-            parseFolder(entry, profile);
-        else {
-            profile->add(entry);
-        }
     }
 }

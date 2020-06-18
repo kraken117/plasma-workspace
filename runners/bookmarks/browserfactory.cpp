@@ -19,7 +19,7 @@
  */
 
 #include "browserfactory.h"
-#include "browser.h"
+#include "browsers/browser.h"
 #include "browsers/kdebrowser.h"
 #include "browsers/firefox.h"
 #include "browsers/opera.h"

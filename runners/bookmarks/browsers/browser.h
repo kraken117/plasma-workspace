@@ -26,6 +26,9 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <QString>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
 #include "bookmarkmatch.h"
 
 class Browser
@@ -63,6 +66,40 @@ protected:
             return QFile(source).copy(cache) ? Copied : Error;
         }
         return Unchanged;
+    }
+
+    QJsonArray readChromeFormatBookmarks(const QString &path) {
+        QJsonArray bookmarks;
+        QFile bookmarksFile(path);
+        if (!bookmarksFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            return {};
+        }
+        QJsonDocument jdoc = QJsonDocument::fromJson(bookmarksFile.readAll());
+        if (jdoc.isNull()) {
+            return {};
+        }
+        const QJsonObject resultMap = jdoc.object();
+        if (!resultMap.contains(QLatin1String("roots"))) {
+            return {};
+        }
+        const QJsonObject entries = resultMap.value(QStringLiteral("roots")).toObject();
+        for (const QJsonValue &folder : entries) {
+            parseFolder(folder.toObject(), bookmarks);
+        }
+        return bookmarks;
+    }
+
+private:
+    void parseFolder(const QJsonObject &obj, QJsonArray &bookmarks) {
+        const QJsonArray children = obj.value(QStringLiteral("children")).toArray();
+        for (const QJsonValue &child : children) {
+            const QJsonObject entry = child.toObject();
+            if(entry.value(QStringLiteral("type")).toString() == QLatin1String("folder"))
+                parseFolder(entry, bookmarks);
+            else {
+                bookmarks.append(entry);
+            }
+        }
     }
 };
 
