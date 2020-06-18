@@ -41,7 +41,8 @@ private:
     QString getStartupProfileDir();
     QList<QJsonObject> readProfileBookmarks(const QString &profilePath);
     QList<QJsonObject> m_falkonBookmarkEntries;
-    Favicon * const m_favicon;
+    Favicon * m_favicon;
+    QString m_startupProfile;
 };
 
 #endif // FALKON_H
