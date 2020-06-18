@@ -72,17 +72,17 @@ protected:
         QJsonArray bookmarks;
         QFile bookmarksFile(path);
         if (!bookmarksFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            return {};
+            return bookmarks;
         }
-        QJsonDocument jdoc = QJsonDocument::fromJson(bookmarksFile.readAll());
+        const QJsonDocument jdoc = QJsonDocument::fromJson(bookmarksFile.readAll());
         if (jdoc.isNull()) {
-            return {};
+            return bookmarks;
         }
         const QJsonObject resultMap = jdoc.object();
         if (!resultMap.contains(QLatin1String("roots"))) {
-            return {};
+            return bookmarks;
         }
-        const QJsonObject entries = resultMap.value(QStringLiteral("roots")).toObject();
+        const QJsonObject entries = resultMap.value(QLatin1String("roots")).toObject();
         for (const QJsonValue &folder : entries) {
             parseFolder(folder.toObject(), bookmarks);
         }
@@ -94,7 +94,7 @@ private:
         const QJsonArray children = obj.value(QStringLiteral("children")).toArray();
         for (const QJsonValue &child : children) {
             const QJsonObject entry = child.toObject();
-            if(entry.value(QStringLiteral("type")).toString() == QLatin1String("folder"))
+            if(entry.value(QLatin1String("type")).toString() == QLatin1String("folder"))
                 parseFolder(entry, bookmarks);
             else {
                 bookmarks.append(entry);
