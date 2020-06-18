@@ -43,7 +43,7 @@ Browser *BrowserFactory::find(const QString &browserName, QObject *parent)
     } else if (browserName.contains(QLatin1String("chromium"), Qt::CaseInsensitive)) {
         m_previousBrowser = new Chrome(new FindChromeProfile(QStringLiteral("chromium"), QDir::homePath(), parent), parent);
     } else if (browserName.contains(QLatin1String("falkon"), Qt::CaseInsensitive)) {
-        m_previousBrowser = new Falkon();
+        m_previousBrowser = new Falkon(parent);
     } else {
         m_previousBrowser = new KDEBrowser(parent);
     }
