@@ -38,7 +38,7 @@ public Q_SLOTS:
     void prepare() override;
     void teardown() override;
 private:
-    QStringList fetchAvailableProfileDirs();
+    QString getStartupProfileDir();
     QList<QJsonObject> readProfileBookmarks(const QString &profilePath);
     QList<QJsonObject> m_falkonBookmarkEntries;
     Favicon * const m_favicon;

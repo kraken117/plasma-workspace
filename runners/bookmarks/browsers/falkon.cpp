@@ -27,6 +27,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <KSharedConfig>
+#include <KConfigGroup>
 #include "favicon.h"
 
 
@@ -47,10 +49,7 @@ QList<BookmarkMatch> Falkon::match(const QString& term, bool addEverything )
 
 void Falkon::prepare()
 {
-    const QStringList profiles = fetchAvailableProfileDirs();
-    for (const auto &profile : profiles) {
-        m_falkonBookmarkEntries << readProfileBookmarks(profile);
-    }
+    m_falkonBookmarkEntries = readProfileBookmarks(getStartupProfileDir());
 }
 
 void Falkon::teardown()
@@ -58,16 +57,11 @@ void Falkon::teardown()
     m_falkonBookmarkEntries.clear();
 }
 
-QStringList Falkon::fetchAvailableProfileDirs()
+QString Falkon::getStartupProfileDir()
 {
-    const QString profilesRoot = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation)
-                                    + QStringLiteral("/falkon/profiles/");
-    const QStringList dirs = QDir(profilesRoot).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    QStringList profileDirs;
-    for (const auto &dir : dirs) {
-        profileDirs << profilesRoot + dir;
-    }
-    return profileDirs;
+    const QString profilesIni = QStandardPaths::locate(QStandardPaths::ConfigLocation, QStringLiteral("/falkon/profiles/profiles.ini"));
+    const QString startupProfile =KSharedConfig::openConfig(profilesIni)->group("Profiles").readEntry("startProfile");
+    return QFileInfo(profilesIni).dir().absoluteFilePath(startupProfile);
 }
 
 QList<QJsonObject> Falkon::readProfileBookmarks(const QString &profilePath)
