@@ -24,13 +24,10 @@
 #include "browsers/findprofile.h"
 
 #include <QJsonArray>
-#include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QFileInfo>
 #include <QDebug>
-#include "bookmarksrunner_defs.h"
-#include <QDir>
 
 class ProfileBookmarks {
 public:
@@ -84,7 +81,6 @@ QList<BookmarkMatch> Chrome::match(const QString &term, bool addEveryThing, Prof
     QList<BookmarkMatch> results;
 
     const auto bookmarks = profileBookmarks->bookmarks();
-    qWarning() << "chrommmmmm"<<bookmarks.count();
     Favicon *favicon = profileBookmarks->profile().favicon();
     for (const QJsonValue &bookmarkValue : bookmarks) {
         const QJsonObject bookmark = bookmarkValue.toObject();

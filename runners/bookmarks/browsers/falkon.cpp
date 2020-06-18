@@ -18,13 +18,10 @@
  */
 
 #include "falkon.h"
-#include <QDebug>
-#include "bookmarksrunner_defs.h"
 #include <QDir>
 #include <QStandardPaths>
 #include <QFile>
 #include <QJsonDocument>
-#include <QJsonObject>
 #include <QJsonArray>
 #include <KSharedConfig>
 #include <KConfigGroup>
