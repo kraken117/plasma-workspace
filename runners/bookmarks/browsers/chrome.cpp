@@ -97,7 +97,11 @@ void Chrome::prepare()
     for(ProfileBookmarks *profileBookmarks : qAsConst(m_profileBookmarks)) {
         Profile profile = profileBookmarks->profile();
         profileBookmarks->clear();
-        profileBookmarks->add(readChromeFormatBookmarks(profile.path()));
+        const QJsonArray bookmarks = readChromeFormatBookmarks(profile.path());
+        if (bookmarks.isEmpty()) {
+            continue;
+        }
+        profileBookmarks->add(bookmarks);
         updateCacheFile(profile.faviconSource(), profile.faviconCache());
         profile.favicon()->prepare();
     }
