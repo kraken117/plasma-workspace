@@ -64,6 +64,14 @@ AppEntry::AppEntry(AbstractModel *owner, const QString &id) : AbstractEntry(owne
     if (url.scheme() == QLatin1String("preferred")) {
         m_service = defaultAppByName(url.host());
         m_id = id;
+        QObject::connect(KSycoca::self(), QOverload<>::of(&KSycoca::databaseChanged), owner, [this, owner, id](){
+            m_service = defaultAppByName(QUrl(id).host());
+            if (m_service) {
+                init((NameFormat)owner->rootModel()->property("appNameFormat").toInt());
+                m_icon = QIcon();
+                Q_EMIT owner->layoutChanged();
+            }
+        });
     } else {
         m_service = KService::serviceByStorageId(id);
     }
@@ -260,7 +268,7 @@ QString AppEntry::nameFromService(const KService::Ptr service, NameFormat nameFo
 KService::Ptr AppEntry::defaultAppByName(const QString& name)
 {
     if (name == QLatin1String("browser")) {
-        KConfigGroup config(KSharedConfig::openConfig(), "General");
+        KConfigGroup config(KSharedConfig::openConfig(QStringLiteral("kdeglobals")), "General");
         QString browser = config.readPathEntry("BrowserApplication", QString());
 
         if (browser.isEmpty()) {
